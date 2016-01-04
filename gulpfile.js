@@ -59,11 +59,11 @@ gulp.task('combineScripts', ['moveModules'], function() {
   return b.bundle()
     .pipe(source('app.js'))
     .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
+   // .pipe(sourcemaps.init({loadMaps: true}))
         // Add transformation tasks to the pipeline here.
-        .pipe(uglify())
+        //.pipe(uglify())
         .on('error', gutil.log)
-    .pipe(sourcemaps.write('./'))
+    //.pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./build/js/'));
 });
 
@@ -73,5 +73,5 @@ gulp.task('default', ['moveModules', 'moveHtml', 'combineScripts'], function() {
 	});
 	gulp.watch(['src/*.html'], ['moveHtml']);
 	gulp.watch(['src/js/*.js'], ['combineScripts']);
-	gulp.watch(['src/components/*.js'], ['combineScripts']);
+	gulp.watch(['src/components/*.jsx'], ['combineScripts']);
 });
