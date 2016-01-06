@@ -2,6 +2,8 @@ var express = require('express')
 	, http = require('http')
 	, Forecast = require("forecast.io")
 	, moment = require('moment')
+	, ical = require('ical')
+	, RSVP = require('rsvp')
 	, config = require('./server/config');
 
 // create our server
@@ -77,6 +79,22 @@ app.get('/news', function(req, res) {
 	    }
 	    return res.json(trimmedResults);
 	  }
+	});
+});
+
+// calendar
+app.get('/calendar', function(req, res) {
+	var getCalendar = function(url) {
+		var promise = new RSVP.Promise(function(resolve, reject) {
+		    ical.fromURL(url, {}, function(err, data) {
+		    	if(err) reject(err);
+		    	resolve(data);
+		    });
+		});
+		return promise;
+	};
+	getCalendar('https://www.google.com/calendar/ical/dylanschuster.com_ul3v0h981b1buo92nsfo9e28tc%40group.calendar.google.com/private-44c47620d465b52ae2a30f8525c20f18/basic.ics').then(function(data) {
+		res.json(data);
 	});
 });
 

@@ -11,7 +11,9 @@
   "dependencies": {
     "express": "^4.13.3",
     "forecast.io": "0.0.9",
-    "nyt-top": "^1.0.4"
+    "ical": "^0.4.0",
+    "nyt-top": "^1.0.4",
+    "rsvp": "^3.1.0"
   },
   "devDependencies": {
     "babel-preset-react": "^6.3.13",
