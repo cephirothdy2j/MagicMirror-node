@@ -40,6 +40,11 @@ gulp.task('moveHtml', function() {
 	gulp.src('src/*.html').pipe(gulp.dest('build/')).pipe(livereload());
 });
 
+// move the CSS file on change
+gulp.task('moveCss', function() {
+  gulp.src('src/css/style.css').pipe(gulp.dest('build/css')).pipe(livereload());
+});
+
 // copy necessary node_modules to public directory
 gulp.task('moveModules', function() {
 	gulp.src('node_modules/jquery/dist/jquery.js').pipe(gulp.dest('src/js/'));
@@ -69,11 +74,12 @@ gulp.task('combineScripts', function() {
     .pipe(gulp.dest('./build/js/'));
 });
 
-gulp.task('default', ['moveModules', 'moveHtml', 'combineScripts'], function() {
+gulp.task('default', ['moveModules', 'moveHtml', 'moveCss', 'combineScripts'], function() {
 	livereload.listen({
 		reloadPage : 'build/index.html'
 	});
 	gulp.watch(['src/*.html'], ['moveHtml']);
+  gulp.watch(['src/*.css'], ['moveCss']);
 	gulp.watch(['src/js/*.js'], ['combineScripts']);
 	gulp.watch(['src/components/*.jsx'], ['combineScripts']);
 });
