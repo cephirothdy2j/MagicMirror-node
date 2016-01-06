@@ -1,6 +1,6 @@
 var express = require('express')
 	, http = require('http')
-	, weather = require("Openweather-Node")
+	, Forecast = require("forecast.io")
 	, config = require('./server/config');
 
 // create our server
@@ -10,20 +10,17 @@ app.use(express.static(__dirname + '/build'));
 
 
 // let's set our weather config
-weather.setAPPID(config.openWeather.appId);
-weather.setCulture("en");
-weather.setForecastType("daily");
+var forecast = new Forecast({
+	APIKey : config.forecast.apiKey,
+});
+var forecastOptions = {
+	exclude: 'minutely,hourly,flags'
+};
 
 app.get('/weather', function(req, res) {
-	weather.now(config.openWeather.locationId, function(err, data) {
-		if(err) {
-			console.log(err);
-		  	return res.json({
-		  		"error" : true
-		  	});
-		} else {
-			return res.json(data);
-		}
+	forecast.get(config.forecast.lat, config.forecast.lng, forecastOptions, function (err, resp, data) {
+		if (err) throw err;
+		res.json(data);
 	});
 });
 

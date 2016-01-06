@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.3",
-    "nyt-top": "^1.0.4",
-    "openweather-node": "0.0.4"
+    "forecast.io": "0.0.9",
+    "nyt-top": "^1.0.4"
   },
   "devDependencies": {
     "babel-preset-react": "^6.3.13",
