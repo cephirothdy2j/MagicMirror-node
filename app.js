@@ -1,6 +1,7 @@
 var express = require('express')
 	, http = require('http')
 	, Forecast = require("forecast.io")
+	, moment = require('moment')
 	, config = require('./server/config');
 
 // create our server
@@ -14,13 +15,45 @@ var forecast = new Forecast({
 	APIKey : config.forecast.apiKey,
 });
 var forecastOptions = {
-	exclude: 'minutely,hourly,flags'
+	exclude: 'minutely,flags'
 };
 
 app.get('/weather', function(req, res) {
 	forecast.get(config.forecast.lat, config.forecast.lng, forecastOptions, function (err, resp, data) {
+
 		if (err) throw err;
-		res.json(data);
+		var response = {};
+
+		// return the current forecast
+		if(data.currently) {
+			response.currently = {
+				summary : data.currently.summary || null,
+				icon : data.currently.icon || null,
+				temperature : Math.round(data.currently.temperature) || null
+			};
+		}
+		// return the first 12 hours of the hourly forecast
+		response.hourly = [];
+		if(data.hourly && data.hourly.data) {
+			for(var i = 0; i < 12; i++) {
+				var thisHour = {}
+				if(data.hourly.data[i]) {
+					thisHour = {
+						temp : Math.round(data.hourly.data[i].temperature) || null,
+						time : moment(data.hourly.data[i].time * 1000).format('h:mma') || null,
+						summary : data.hourly.data[i].summary || null,
+						icon : data.hourly.data[i].icon || null
+					}
+					// response.hourly.push(data.hourly.data[i]);
+					response.hourly.push(thisHour);
+				} else {
+					break;
+				}
+			}
+		}
+
+		// send the response
+		res.json(response);
 	});
 });
 
