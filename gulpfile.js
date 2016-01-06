@@ -45,9 +45,11 @@ gulp.task('moveModules', function() {
 	gulp.src('node_modules/jquery/dist/jquery.js').pipe(gulp.dest('src/js/'));
 	gulp.src('node_modules/react/dist/react.js').pipe(gulp.dest('src/js/'));
 	gulp.src('node_modules/react-dom/dist/react-dom.js').pipe(gulp.dest('src/js/'));
+  gulp.src('node_modules/moment/moment.js').pipe(gulp.dest('src/js/'));
+
 });
 
-gulp.task('combineScripts', ['moveModules'], function() {
+gulp.task('combineScripts', function() {
   // set up the browserify instance on a task basis
   var b = browserify({
     entries: './src/js/main.js',
