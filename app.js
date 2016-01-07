@@ -4,6 +4,7 @@ var express = require('express')
 	, moment = require('moment')
 	, ical = require('ical')
 	, RSVP = require('rsvp')
+	, _ = require('lodash')
 	, config = require('./server/config');
 
 // create our server
@@ -84,17 +85,42 @@ app.get('/news', function(req, res) {
 
 // calendar
 app.get('/calendar', function(req, res) {
+	var currentTime = new Date().getTime();
+	// promisify the calendar retrieval
 	var getCalendar = function(url) {
 		var promise = new RSVP.Promise(function(resolve, reject) {
 		    ical.fromURL(url, {}, function(err, data) {
-		    	if(err) reject(err);
-		    	resolve(data);
+		    	if(err) {
+		    		reject(err);
+		    	} else {
+			    	// let's only return current / future events
+			    	var currentTime = new Date();
+			    	var futureEvents = [];
+			    	_.forIn(data, function(val, key) {
+			    		if(val.start >= currentTime) {
+			    			futureEvents.push(val);
+			    		}
+			    	})
+			    	// then, let's sort those future events from closest to farthest in the future
+			    	futureEvents.sort(function(a,b) {
+						// Turn your strings into dates, and then subtract them
+						// to get a value that is either negative, positive, or zero.
+						return new Date(a.start) - new Date(b.start);
+			    	})
+			    	// finally, let's only return the first 10
+			    	resolve(futureEvents.slice(0,10));
+		    	}
 		    });
 		});
 		return promise;
 	};
-	getCalendar('https://www.google.com/calendar/ical/dylanschuster.com_ul3v0h981b1buo92nsfo9e28tc%40group.calendar.google.com/private-44c47620d465b52ae2a30f8525c20f18/basic.ics').then(function(data) {
-		res.json(data);
+	var promises = config.calendars.map(function(cal) {
+		return getCalendar(cal);
+	});
+	RSVP.all(promises).then(function(data) {
+		// we need to sort the calendar events by date
+		// then we need to return the next upcoming 10 events to the front end
+		return res.json(_.flatten(data).slice(0,10));
 	});
 });
 
