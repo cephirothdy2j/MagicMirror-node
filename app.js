@@ -106,7 +106,7 @@ app.get('/calendar', function(req, res) {
 						// Turn your strings into dates, and then subtract them
 						// to get a value that is either negative, positive, or zero.
 						return new Date(a.start) - new Date(b.start);
-			    	})
+			    	});
 			    	// finally, let's only return the first 10
 			    	resolve(futureEvents.slice(0,10));
 		    	}
@@ -118,9 +118,15 @@ app.get('/calendar', function(req, res) {
 		return getCalendar(cal);
 	});
 	RSVP.all(promises).then(function(data) {
+		var events = _.flatten(data);
+    	events.sort(function(a,b) {
+			// Turn your strings into dates, and then subtract them
+			// to get a value that is either negative, positive, or zero.
+			return new Date(a.start) - new Date(b.start);
+    	});
 		// we need to sort the calendar events by date
 		// then we need to return the next upcoming 10 events to the front end
-		return res.json(_.flatten(data).slice(0,10));
+		return res.json(events.slice(0,10));
 	});
 });
 
