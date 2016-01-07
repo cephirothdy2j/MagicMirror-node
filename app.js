@@ -96,8 +96,11 @@ app.get('/calendar', function(req, res) {
 			    	// let's only return current / future events
 			    	var currentTime = new Date();
 			    	var futureEvents = [];
+			    	// TO DO - handle recurring events. This is a problem now.
+
+			    	// if the end date is in the future, push the event
 			    	_.forIn(data, function(val, key) {
-			    		if(val.start >= currentTime) {
+			    		if(val.end >= currentTime) {
 			    			futureEvents.push(val);
 			    		}
 			    	})
@@ -118,15 +121,31 @@ app.get('/calendar', function(req, res) {
 		return getCalendar(cal);
 	});
 	RSVP.all(promises).then(function(data) {
+		// let's flatten the results into one array
 		var events = _.flatten(data);
+		// now, let's de-dupe by event name AND start time (dangerous, I know ...)
+		events = _.uniq(events, function(ev) {
+			return JSON.stringify(_.pick(ev, ['summary', 'start']));
+		});
+		// we need to sort the calendar events by date
+		// TO DO - DRY this out (using the same above)
     	events.sort(function(a,b) {
 			// Turn your strings into dates, and then subtract them
 			// to get a value that is either negative, positive, or zero.
 			return new Date(a.start) - new Date(b.start);
     	});
-		// we need to sort the calendar events by date
 		// then we need to return the next upcoming 10 events to the front end
-		return res.json(events.slice(0,10));
+		events.slice(0,10);
+		// only return what we need to the front end
+		_.each(events, function(ev, i) {
+			events[i] = {
+				summary : ev.summary,
+				start : ev.start,
+				end : ev.end,
+				location : ev.location
+			}
+		})
+		return res.json(events);
 	});
 });
 
@@ -139,6 +158,5 @@ app.get('/', function(req, res) {
 var server = app.listen(8080, function () {
   var host = server.address().address;
   var port = server.address().port;
-
   console.log('Example app listening at http://%s:%s', host, port);
 });
