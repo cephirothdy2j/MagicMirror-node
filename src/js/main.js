@@ -4,7 +4,7 @@ var ReactDOM = require('react-dom');
 // require all the modules
 require('../components/Weather.jsx');
 require('../components/Time.jsx');
-require('../components/Events.jsx');
+require('../components/Events.jsx'); 
 
 var HelloWorld = React.createClass({
   render: function() {
